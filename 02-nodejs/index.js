@@ -22,7 +22,7 @@ const obterEnderecoAsync = util.promisify(obterEndereco)
  function obterUsuario(){
      //Quando der algum problema -> reject(Erro)
      //Quando sucesso -> RESOLVE
-     return new Promise(function resolvePromise(resolve, reject) {
+     return new Promise(function resolvePromise(resolve) {
          setTimeout(function(){
             //return reject(new Error('DEU RUIM DE VERDADE!'))
 
@@ -35,24 +35,24 @@ const obterEnderecoAsync = util.promisify(obterEndereco)
      })
  }
 
- function obterTelefone(idUsuario) {
-     return new Promise(function resolvePromise(resolve, reject){
+ function obterTelefone() {
+     return new Promise(function resolvePromise(resolve){
          setTimeout(() =>{
            return resolve({
                telefone: '1199002',
                ddd: 11
-           })
+            })
          },2000)
      })
  }
 
  function obterEndereco(idUsuario, callback) {
-     setTimeout(() => {
+        setTimeout(() => {
          return callback(null, {
             rua: 'dos bobos' ,
             numero: 0
          })
-     },2000)
+      },2000)
  }
 
  //1º Passo adicionar a palavra async -> automaticamente ela retornará uma Promise
@@ -61,12 +61,12 @@ const obterEnderecoAsync = util.promisify(obterEndereco)
         try{
             console.time('medida-promisse')
             const usuario = await obterUsuario()
-            //const telefone = await obterTelefone(usuario.id)
-            //const endereco = await obterEnderecoAsync(usuario.id)
+            // const telefone = await obterTelefone(usuario.id)
+            // const endereco = await obterEnderecoAsync(usuario.id)
             const resultado = await Promise.all([
-                obterTelefone(usuario.id),
+               obterTelefone(usuario.id),
                 obterEnderecoAsync(usuario.id)
-            ])
+           ])
             const endereco = resultado[1]
             const telefone = resultado[0]
             console.log(`
