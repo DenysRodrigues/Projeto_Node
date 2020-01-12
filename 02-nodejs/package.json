@@ -9,9 +9,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "devDependencies": {},
-  "dependencies": {
-    "remove-node-modules": "^1.7.4"
-  }
+  "license": "ISC"
 }
