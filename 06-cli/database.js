@@ -1,10 +1,13 @@
 const {
-    readFile
+    readFile,
+    writeFile
 } = require('fs')
 
-const {promisify} = require('util')
+const { promisify } = require('util')
 
 const readFileAsync = promisify(readFile)
+const writeFileAsync = promisify(writeFile)
+
 
 /** outra forma de obter dados do json
  ** const dadosJson = require('.herois.json')
@@ -18,14 +21,104 @@ class Database {
         const arquivo = await readFileAsync(this.NOME_ARQUIVO, 'utf8')
         return JSON.parse(arquivo.toString())
     }
-    escreverArquivo() {
-
+    async escreverArquivo(dados) {
+        await writeFileAsync(this.NOME_ARQUIVO, JSON.stringify(dados))
+        return true
     }
-    async listar(id){
+
+    async cadastrar(heroi) {
         const dados = await this.obterDadosArquivo()
-        const dadosFiltrados = dados.filter(item => (id ? (item.id === id) : false))
+        const id = heroi.id <= 2 ? heroi.id : Date.now();
+        /**
+         * {
+         *  nome: Flash,
+         *  poder: Velocidade
+         * }
+         * 
+         * {
+         *  id:123456789
+         * }
+         * 
+         * {
+         *  nome: Flash,
+         *  poder: Velocidade
+         *  id: 1
+         * }
+         */
+        const heroiidComId = {
+            id,
+            ...heroi
+        }
+        const dadosFinal = [
+            ...dados,
+            heroiidComId
+        ]
+        /** 
+         * [
+         * {
+         *  nome: Flash
+         * }
+         * ]
+         * 
+         * {
+         *  nome: Batman
+         * }
+         * 
+         * [
+         *   {
+         *      nome: Flash
+         *   },
+         *   {
+         *      nome: Batman
+         *   }
+         * ]
+        */
+       const resultado = await this.escreverArquivo(dadosFinal)
+       return resultado;
+    }
+
+    async listar(id) {
+        const dados = await this.obterDadosArquivo()
+        // console.log('dados :', dados);
+        const dadosFiltrados = dados.filter(item => (id ? (item.id === id) : true))
+        // console.log('dadosFiltrados :', dadosFiltrados);
+        
         return dadosFiltrados
     }
+
+    async remover(id){
+        if(!id) {
+            await this.escreverArquivo([])
+        }
+        const dados = await this.obterDadosArquivo()
+        const indice = dados.findIndex(item => item.id === parseInt(id))
+        if (indice === -1){
+            throw Error('O usuário informado não existe')
+        }
+        dados.splice(indice, 1)
+        return await this.escreverArquivo(dados)
+    }
+    async atualizar(id, modificacoes) {
+        const dados = await this.obterDadosArquivo()
+        const indice = dados.findIndex(item => item.id === parseInt(id))
+        if(indice === -1){
+            throw Error('O heroi informado não existe')
+        }
+        const atual = dados[indice]
+        const objetoAtualizar = {
+            ...atual,
+            ...modificacoes
+        }
+        dados.splice(indice, 1)
+        
+        return await this.escreverArquivo([
+            ...dados,
+            objetoAtualizar
+        ])
+        
+    }
+
+
 }
 
 module.exports = new Database()
